@@ -161,11 +161,31 @@ export default function LeadGrid({
                 <span className="truncate">{lead.event || "General Intake"}</span>
               </div>
 
-              {/* Notes Excerpt */}
-              <div className="mt-4 p-3.5 rounded-control bg-app-subtle/50 border border-app-subtle">
-                <p className="type-xs text-app-muted line-clamp-2 leading-relaxed">
+              {/* Notes Excerpt with full-text hover tooltip */}
+              <div
+                className="group/gridnotes relative mt-4 p-3.5 rounded-control bg-app-subtle/50 border border-app-subtle cursor-default"
+                title={lead.notes || "No interaction notes recorded."}
+              >
+                <p className="type-xs text-app-muted line-clamp-2 leading-relaxed hover:text-app-primary transition-app">
                   {lead.notes || "No interaction notes recorded."}
                 </p>
+
+                {lead.notes && (
+                  <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 w-full p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/gridnotes:opacity-100 group-hover/gridnotes:translate-y-0 transition-all duration-150 z-50 elevation-overlay">
+                    <div className="flex items-center justify-between pb-1 mb-1 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
+                      <span>Full Notes & Context</span>
+                      {lead.event && (
+                        <span className="font-normal normal-case text-app-muted truncate max-w-[120px]">
+                          {lead.event}
+                        </span>
+                      )}
+                    </div>
+                    <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap">
+                      {lead.notes}
+                    </p>
+                  </div>
+                )}
+
                 {lead.ai_drafted_email && (
                   <div className="flex items-center gap-1.5 mt-2 text-[var(--accent)] type-xs font-medium">
                     <Mail size={12} />

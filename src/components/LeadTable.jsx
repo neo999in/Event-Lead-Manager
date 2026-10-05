@@ -165,7 +165,7 @@ export default function LeadTable({
             <tr className="border-b border-app bg-app-subtle/30 text-app-subtle type-xs font-medium">
               <th className="py-3 px-5 font-medium w-60 first:rounded-tl-panel">Attendee</th>
               <th className="py-3 px-5 font-medium w-48">Event</th>
-              <th className="py-3 px-5 font-medium">Notes & Context</th>
+              <th className="py-3 px-5 font-medium" title="Hover over row notes to view complete interaction text">Notes & Context</th>
               <th className="py-3 px-5 font-medium w-40">Pipeline Stage</th>
               <th className="py-3 px-5 font-medium w-24">Priority</th>
               <th className="py-3 px-5 font-medium w-32">Last Updated</th>
@@ -215,10 +215,36 @@ export default function LeadTable({
                     </div>
                   </td>
 
-                  {/* Notes & Follow-up Draft Marker */}
+                  {/* Notes & Follow-up Draft Marker with Full-Text Hover Tooltip */}
                   <td className="py-3.5 px-5">
-                    <div className="type-xs text-app-muted line-clamp-1">
-                      {lead.notes || <span className="italic text-app-subtle">No notes entered</span>}
+                    <div
+                      className="group/notes relative inline-block max-w-full"
+                      title={lead.notes || "No notes entered"}
+                    >
+                      <div className="type-xs text-app-muted line-clamp-1 cursor-default hover:text-app-primary transition-app">
+                        {lead.notes || <span className="italic text-app-subtle">No notes entered</span>}
+                      </div>
+
+                      {/* Rich Floating Tooltip on Hover */}
+                      {lead.notes && (
+                        <div
+                          className={`pointer-events-none absolute left-0 ${
+                            index === 0 ? "top-full mt-1.5" : "bottom-full mb-1.5"
+                          } w-80 p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/notes:opacity-100 group-hover/notes:translate-y-0 transition-all duration-150 z-50 elevation-overlay`}
+                        >
+                          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
+                            <span>Notes & Context</span>
+                            {lead.event && (
+                              <span className="font-normal normal-case text-app-muted truncate max-w-[140px]">
+                                {lead.event}
+                              </span>
+                            )}
+                          </div>
+                          <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap select-text">
+                            {lead.notes}
+                          </p>
+                        </div>
+                      )}
                     </div>
                     {lead.ai_drafted_email && (
                       <div className="inline-flex items-center gap-1.5 mt-1 text-app-subtle type-xs">
@@ -499,11 +525,24 @@ export default function LeadTable({
                 </div>
               </div>
 
-              {/* Notes excerpt */}
+              {/* Notes excerpt with full-text hover tooltip */}
               {lead.notes && (
-                <p className="type-xs text-app-muted line-clamp-2 bg-app-subtle/40 p-2.5 rounded-control border border-app-subtle leading-relaxed">
-                  {lead.notes}
-                </p>
+                <div
+                  className="group/mobnotes relative"
+                  title={lead.notes}
+                >
+                  <p className="type-xs text-app-muted line-clamp-2 bg-app-subtle/40 p-2.5 rounded-control border border-app-subtle leading-relaxed cursor-default hover:text-app-primary transition-app">
+                    {lead.notes}
+                  </p>
+                  <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 w-full p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/mobnotes:opacity-100 group-hover/mobnotes:translate-y-0 transition-all duration-150 z-50 elevation-overlay">
+                    <div className="flex items-center justify-between pb-1 mb-1 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
+                      <span>Full Notes & Context</span>
+                    </div>
+                    <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap">
+                      {lead.notes}
+                    </p>
+                  </div>
+                </div>
               )}
 
               {/* Actions row: optimized for touch and flexible width */}
