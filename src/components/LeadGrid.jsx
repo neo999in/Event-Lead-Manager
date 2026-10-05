@@ -11,6 +11,7 @@ import {
   Plus,
   ChevronDown,
   Check,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -52,6 +53,8 @@ const STAGES = [
 
 export default function LeadGrid({
   leads = [],
+  deletingLeadId = null,
+  updatingLeadId = null,
   onOpenDrawer,
   onOpenEditModal,
   onOpenAIModal,
@@ -181,17 +184,22 @@ export default function LeadGrid({
                 <button
                   type="button"
                   onClick={() => setOpenStageMenuId(openStageMenuId === lead.id ? null : lead.id)}
+                  disabled={updatingLeadId === lead.id}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control border text-xs font-medium cursor-pointer transition-app hover:opacity-90 whitespace-nowrap shadow-2xs ${statusCfg.badgeClass}`}
                   aria-expanded={openStageMenuId === lead.id}
                 >
                   <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dotClass}`} />
                   <span>{statusCfg.label}</span>
-                  <ChevronDown
-                    size={11}
-                    className={`opacity-70 transition-transform duration-150 ${
-                      openStageMenuId === lead.id ? "rotate-180" : ""
-                    }`}
-                  />
+                  {updatingLeadId === lead.id ? (
+                    <Loader2 size={11} className="animate-spin opacity-70" />
+                  ) : (
+                    <ChevronDown
+                      size={11}
+                      className={`opacity-70 transition-transform duration-150 ${
+                        openStageMenuId === lead.id ? "rotate-180" : ""
+                      }`}
+                    />
+                  )}
                 </button>
 
                 {openStageMenuId === lead.id && (
@@ -254,11 +262,16 @@ export default function LeadGrid({
                   variant="ghost"
                   size="icon"
                   onClick={() => onDeleteLead(lead.id, lead.name)}
+                  disabled={deletingLeadId === lead.id}
                   title="Delete lead"
                   aria-label="Delete lead"
                   className="h-8 w-8 text-app-muted hover:text-[var(--status-error-fg)] hover:bg-red-500/15 transition-app"
                 >
-                  <Trash2 size={16} />
+                  {deletingLeadId === lead.id ? (
+                    <Loader2 size={16} className="animate-spin text-[var(--status-error-fg)]" />
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
                 </Button>
 
                 <Button

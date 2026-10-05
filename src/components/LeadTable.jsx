@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Check,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,8 @@ const STAGES = [
 
 export default function LeadTable({
   leads = [],
+  deletingLeadId = null,
+  updatingLeadId = null,
   onOpenDrawer,
   onOpenEditModal,
   onOpenAIModal,
@@ -231,17 +234,22 @@ export default function LeadTable({
                       <button
                         type="button"
                         onClick={() => setOpenStageMenuId(openStageMenuId === lead.id ? null : lead.id)}
+                        disabled={updatingLeadId === lead.id}
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control border text-xs font-medium cursor-pointer transition-app hover:opacity-90 whitespace-nowrap shadow-2xs ${statusCfg.badgeClass}`}
                         aria-expanded={openStageMenuId === lead.id}
                       >
                         <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dotClass}`} />
                         <span>{statusCfg.label}</span>
-                        <ChevronDown
-                          size={11}
-                          className={`opacity-70 transition-transform duration-150 ${
-                            openStageMenuId === lead.id ? "rotate-180" : ""
-                          }`}
-                        />
+                        {updatingLeadId === lead.id ? (
+                          <Loader2 size={11} className="animate-spin opacity-70" />
+                        ) : (
+                          <ChevronDown
+                            size={11}
+                            className={`opacity-70 transition-transform duration-150 ${
+                              openStageMenuId === lead.id ? "rotate-180" : ""
+                            }`}
+                          />
+                        )}
                       </button>
 
                       {openStageMenuId === lead.id && (
@@ -342,11 +350,16 @@ export default function LeadTable({
                         variant="ghost"
                         size="icon"
                         onClick={() => onDeleteLead(lead.id, lead.name)}
+                        disabled={deletingLeadId === lead.id}
                         title="Delete lead"
                         aria-label="Delete lead"
                         className="h-8 w-8 rounded-control text-app-muted hover:text-[var(--status-error-fg)] hover:bg-red-500/15 transition-app"
                       >
-                        <Trash2 size={16} />
+                        {deletingLeadId === lead.id ? (
+                          <Loader2 size={16} className="animate-spin text-[var(--status-error-fg)]" />
+                        ) : (
+                          <Trash2 size={16} />
+                        )}
                       </Button>
 
                       <Button
@@ -403,17 +416,22 @@ export default function LeadTable({
                   <button
                     type="button"
                     onClick={() => setOpenStageMenuId(isMobMenuOpen ? null : `mob-${lead.id}`)}
+                    disabled={updatingLeadId === lead.id}
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control border text-xs font-medium cursor-pointer transition-app whitespace-nowrap shadow-2xs ${statusCfg.badgeClass}`}
                     aria-expanded={isMobMenuOpen}
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${statusCfg.dotClass}`} />
                     <span>{statusCfg.label}</span>
-                    <ChevronDown
-                      size={11}
-                      className={`opacity-70 transition-transform duration-150 ${
-                        isMobMenuOpen ? "rotate-180" : ""
-                      }`}
-                    />
+                    {updatingLeadId === lead.id ? (
+                      <Loader2 size={11} className="animate-spin opacity-70" />
+                    ) : (
+                      <ChevronDown
+                        size={11}
+                        className={`opacity-70 transition-transform duration-150 ${
+                          isMobMenuOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    )}
                   </button>
 
                   {isMobMenuOpen && (
@@ -523,10 +541,15 @@ export default function LeadTable({
                 <Button
                   variant="outline"
                   onClick={() => onDeleteLead(lead.id, lead.name)}
+                  disabled={deletingLeadId === lead.id}
                   className="px-2.5 sm:px-3 h-9 sm:h-10 min-w-[38px] sm:min-w-[42px] shrink-0 text-app-muted hover:text-[var(--status-error-fg)]"
                   aria-label="Delete"
                 >
-                  <Trash2 size={15} />
+                  {deletingLeadId === lead.id ? (
+                    <Loader2 size={15} className="animate-spin text-[var(--status-error-fg)]" />
+                  ) : (
+                    <Trash2 size={15} />
+                  )}
                 </Button>
               </div>
             </div>

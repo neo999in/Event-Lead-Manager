@@ -12,6 +12,7 @@ import {
   X,
   CalendarCheck,
   History,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +26,7 @@ export default function Navbar({
   viewMode,
   setViewMode,
   leadCount = 0,
+  isSeeding = false,
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -50,11 +52,16 @@ export default function Navbar({
             variant="ghost"
             size="sm"
             onClick={onSeedData}
+            disabled={isSeeding}
             title="Load demo conference data"
             className="type-xs text-app-muted hover:text-app-primary"
           >
-            <Database size={14} />
-            <span className="hidden lg:inline">Demo Data</span>
+            {isSeeding ? (
+              <Loader2 size={14} className="animate-spin text-[var(--accent)]" />
+            ) : (
+              <Database size={14} />
+            )}
+            <span className="hidden lg:inline">{isSeeding ? "Loading..." : "Demo Data"}</span>
           </Button>
 
           <Button
@@ -166,14 +173,19 @@ export default function Navbar({
             <Button
               variant="outline"
               size="mobile"
+              disabled={isSeeding}
               onClick={() => {
                 onSeedData();
                 setMobileMenuOpen(false);
               }}
               className="w-full justify-start type-xs"
             >
-              <Database size={15} />
-              <span>Demo Leads</span>
+              {isSeeding ? (
+                <Loader2 size={15} className="animate-spin text-[var(--accent)]" />
+              ) : (
+                <Database size={15} />
+              )}
+              <span>{isSeeding ? "Loading Demo Leads..." : "Demo Leads"}</span>
             </Button>
 
             <Button

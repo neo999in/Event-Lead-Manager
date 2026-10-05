@@ -64,6 +64,9 @@ export default function Home() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
+  const [deletingLeadId, setDeletingLeadId] = useState(null);
+  const [updatingLeadId, setUpdatingLeadId] = useState(null);
 
   // Toast notifications
   const [toasts, setToasts] = useState([]);
@@ -281,6 +284,7 @@ export default function Home() {
     }
 
     try {
+      setDeletingLeadId(id);
       await api.deleteLead(id);
       setLeads((prev) => prev.filter((l) => l.id !== id));
       if (drawerLead?.id === id) setIsDrawerOpen(false);
@@ -289,12 +293,15 @@ export default function Home() {
       api.getEvents().then((e) => setEvents(e.data));
     } catch (err) {
       showToast(`Failed to delete lead: ${err.message}`, "error");
+    } finally {
+      setDeletingLeadId(null);
     }
   };
 
   // Quick Status change
   const handleQuickStatusChange = async (id, newStatus) => {
     try {
+      setUpdatingLeadId(id);
       const payload = { follow_up_status: newStatus };
       if (newStatus === "Contacted") {
         payload.last_contacted_at = new Date().toISOString();
@@ -307,12 +314,15 @@ export default function Home() {
     } catch (err) {
       showToast(`Failed to update status: ${err.message}`, "error");
       refreshAllData();
+    } finally {
+      setUpdatingLeadId(null);
     }
   };
 
   // Seed sample leads
   const handleSeedData = async () => {
     try {
+      setIsSeeding(true);
       setIsSearching(true);
       await api.seedDemoLeads();
       await refreshAllData();
@@ -320,6 +330,7 @@ export default function Home() {
     } catch (err) {
       showToast(`Error seeding demo data: ${err.message}`, "error");
     } finally {
+      setIsSeeding(false);
       setIsSearching(false);
     }
   };
@@ -369,6 +380,7 @@ export default function Home() {
         viewMode={viewMode}
         setViewMode={handleSetViewMode}
         leadCount={leads.length}
+        isSeeding={isSeeding}
       />
 
       {/* Main Workspace */}
@@ -402,6 +414,8 @@ export default function Home() {
         ) : viewMode === "table" ? (
           <LeadTable
             leads={leads}
+            deletingLeadId={deletingLeadId}
+            updatingLeadId={updatingLeadId}
             onOpenDrawer={handleOpenDrawer}
             onOpenEditModal={(lead) => {
               setLeadToEdit(lead);
@@ -422,6 +436,8 @@ export default function Home() {
         ) : (
           <LeadGrid
             leads={leads}
+            deletingLeadId={deletingLeadId}
+            updatingLeadId={updatingLeadId}
             onOpenDrawer={handleOpenDrawer}
             onOpenEditModal={(lead) => {
               setLeadToEdit(lead);

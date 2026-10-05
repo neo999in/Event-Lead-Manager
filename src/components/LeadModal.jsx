@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AlertCircle, Calendar } from "lucide-react";
+import { AlertCircle, Calendar, Loader2 } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
@@ -312,11 +312,16 @@ export default function LeadModal({
             size="sm"
             disabled={isSubmitting}
           >
-            {isSubmitting
-              ? "Saving..."
-              : leadToEdit
-              ? "Save Changes"
-              : "Record Lead"}
+            {isSubmitting ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                <span>{leadToEdit ? "Saving..." : "Recording..."}</span>
+              </>
+            ) : leadToEdit ? (
+              "Save Changes"
+            ) : (
+              "Record Lead"
+            )}
           </Button>
         </div>
       </form>
