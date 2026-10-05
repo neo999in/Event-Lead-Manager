@@ -2,6 +2,8 @@
 
 A high-performance, full-stack conference lead capture, pipeline management, and AI outreach platform built with **Next.js 16 (App Router)**, **SQLite**, and **Tailwind CSS**.
 
+https://event-lead-manager-chi.vercel.app/
+
 ---
 
 ## Quick Setup Guide
@@ -19,7 +21,7 @@ cp .env.example .env.local
 Add your optional Google Gemini API key in `.env.local` ([Get a key here](https://aistudio.google.com/app/apikey)):
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-1.5-flash
+GEMINI_MODEL=gemini-3.5-flash
 ```
 *(If omitted, the platform automatically activates smart built-in heuristic AI synthesis so all features work out-of-the-box offline.)*
 
