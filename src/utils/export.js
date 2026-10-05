@@ -17,6 +17,7 @@ export function exportToCSV(leads, filename = 'event_leads.csv') {
     'Notes',
     'AI Summary',
     'Created At',
+    'Updated At',
     'Last Contacted At'
   ];
 
@@ -38,6 +39,7 @@ export function exportToCSV(leads, filename = 'event_leads.csv') {
     escapeCSV(lead.notes || ''),
     escapeCSV(lead.ai_summary || ''),
     escapeCSV(lead.created_at),
+    escapeCSV(lead.updated_at || lead.created_at),
     escapeCSV(lead.last_contacted_at || '')
   ]);
 

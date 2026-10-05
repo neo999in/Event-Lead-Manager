@@ -22,6 +22,12 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
+    if (!data.name || !data.name.trim() || !data.company || !data.company.trim() || !data.email || !data.email.trim()) {
+      return NextResponse.json(
+        { success: false, message: 'Name, company, and email are required fields.' },
+        { status: 400 }
+      );
+    }
     const lead = dbManager.createLead(data);
     return NextResponse.json({ success: true, data: lead });
   } catch (error) {
