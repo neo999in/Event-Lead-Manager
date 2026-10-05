@@ -6,12 +6,18 @@ const axios = require('axios');
  * `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`
  */
 
-const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+// Tried top-to-bottom; advances to the next on HTTP 503 (model overloaded) or 404 (deprecated).
+const GEMINI_MODELS = [
+  'gemini-3.8-flash',       // Primary — confirmed available
+  'gemini-3.6-flash',       // Fallback 2
+  'gemini-3.5-flash',       // Fallback 3
+  'gemini-3.5-flash-lite',  // Fallback 4 — confirmed lite
+];
 
 /**
- * Call the official Gemini REST API
+ * Call the official Gemini REST API with a single model
  */
-async function callGemini(prompt, model = DEFAULT_MODEL) {
+async function callGemini(prompt, model) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === '' || apiKey.trim() === 'your_gemini_api_key_here') {
@@ -52,6 +58,35 @@ async function callGemini(prompt, model = DEFAULT_MODEL) {
   }
 
   return text.trim();
+}
+
+/**
+ * Try each model in GEMINI_MODELS in order.
+ * Advances to the next model on HTTP 503 (model overloaded / unavailable).
+ * Throws the last error if all models are exhausted.
+ */
+async function callGeminiWithFallback(prompt) {
+  let lastError;
+  for (const model of GEMINI_MODELS) {
+    try {
+      const result = await callGemini(prompt, model);
+      if (GEMINI_MODELS.indexOf(model) > 0) {
+        console.info(`Gemini fallback: responded on model "${model}"`);
+      }
+      return result;
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 503 || status === 404) {
+        const reason = status === 503 ? 'overloaded' : 'unavailable/deprecated';
+        console.warn(`Gemini model "${model}" returned ${status} (${reason}), trying next model…`);
+        lastError = err;
+        continue;
+      }
+      // Any other error (auth, quota, network) – bubble up immediately
+      throw err;
+    }
+  }
+  throw lastError;
 }
 
 /**
@@ -142,7 +177,7 @@ Keep it crisp, professional, and directly actionable for a sales/partnerships te
 `.trim();
 
     try {
-      const summaryText = await callGemini(prompt);
+      const summaryText = await callGeminiWithFallback(prompt);
       return {
         summary: summaryText,
         provider: 'gemini'
@@ -202,7 +237,7 @@ Do NOT output robotic placeholders like "[Your Name]". Use "The Event Team" or c
 `.trim();
 
     try {
-      const emailDraft = await callGemini(prompt);
+      const emailDraft = await callGeminiWithFallback(prompt);
       return {
         draft: emailDraft,
         provider: 'gemini'

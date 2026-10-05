@@ -64,6 +64,7 @@ export default function LeadGrid({
   onOpenAddModal,
 }) {
   const [openStageMenuId, setOpenStageMenuId] = React.useState(null);
+  const [hoveredNotes, setHoveredNotes] = React.useState(null);
 
   React.useEffect(() => {
     if (!openStageMenuId) return;
@@ -161,30 +162,29 @@ export default function LeadGrid({
                 <span className="truncate">{lead.event || "General Intake"}</span>
               </div>
 
-              {/* Notes Excerpt with full-text hover tooltip */}
+              {/* Notes Excerpt */}
               <div
-                className="group/gridnotes relative mt-4 p-3.5 rounded-control bg-app-subtle/50 border border-app-subtle cursor-default"
-                title={lead.notes || "No interaction notes recorded."}
+                onMouseEnter={(e) => {
+                  if (!lead.notes) return;
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setHoveredNotes({
+                    name: lead.name,
+                    event: lead.event,
+                    text: lead.notes,
+                    rect: {
+                      top: rect.top,
+                      bottom: rect.bottom,
+                      left: rect.left,
+                      right: rect.right,
+                    },
+                  });
+                }}
+                onMouseLeave={() => setHoveredNotes(null)}
+                className="mt-4 p-3.5 rounded-control bg-app-subtle/50 border border-app-subtle cursor-pointer"
               >
                 <p className="type-xs text-app-muted line-clamp-2 leading-relaxed hover:text-app-primary transition-app">
                   {lead.notes || "No interaction notes recorded."}
                 </p>
-
-                {lead.notes && (
-                  <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 w-full p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/gridnotes:opacity-100 group-hover/gridnotes:translate-y-0 transition-all duration-150 z-50 elevation-overlay">
-                    <div className="flex items-center justify-between pb-1 mb-1 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
-                      <span>Full Notes & Context</span>
-                      {lead.event && (
-                        <span className="font-normal normal-case text-app-muted truncate max-w-[120px]">
-                          {lead.event}
-                        </span>
-                      )}
-                    </div>
-                    <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap">
-                      {lead.notes}
-                    </p>
-                  </div>
-                )}
 
                 {lead.ai_drafted_email && (
                   <div className="flex items-center gap-1.5 mt-2 text-[var(--accent)] type-xs font-medium">
@@ -309,6 +309,37 @@ export default function LeadGrid({
           </div>
         );
       })}
+
+      {/* Viewport-fixed Portal Tooltip for Grid */}
+      {hoveredNotes && (
+        <div
+          style={{
+            position: "fixed",
+            top: hoveredNotes.rect.top < 230 ? hoveredNotes.rect.bottom + 8 : undefined,
+            bottom: hoveredNotes.rect.top >= 230 ? window.innerHeight - hoveredNotes.rect.top + 8 : undefined,
+            left: Math.max(16, Math.min(hoveredNotes.rect.left, typeof window !== "undefined" ? window.innerWidth - 380 : 16)),
+            maxWidth: "360px",
+            width: "max-content",
+            zIndex: 99999,
+            backgroundColor: "var(--bg-surface)",
+            borderColor: "var(--border-strong)",
+            boxShadow: "0 14px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border)",
+          }}
+          className="pointer-events-none p-3.5 rounded-control border text-left animate-in fade-in zoom-in-95 duration-100"
+        >
+          <div className="flex items-center justify-between gap-3 pb-1.5 mb-1.5 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
+            <span className="text-[var(--accent)] font-bold">Notes & Context</span>
+            {hoveredNotes.event && (
+              <span className="font-medium normal-case text-app-muted truncate max-w-[180px]">
+                {hoveredNotes.event}
+              </span>
+            )}
+          </div>
+          <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap select-none font-normal">
+            {hoveredNotes.text}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

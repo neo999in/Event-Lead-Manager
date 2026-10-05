@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Sparkles,
   Mail,
@@ -17,6 +18,71 @@ import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/utils/api";
+
+/**
+ * Renders AI-generated markdown text with styled typography.
+ * Handles: ### headings, **bold**, * bullets, 1. lists, `code`, ---, blockquotes.
+ */
+function MarkdownContent({ content }) {
+  return (
+    <ReactMarkdown
+      components={{
+        h1: ({ children }) => (
+          <h1 className="text-base font-bold text-app-primary mt-4 mb-2 first:mt-0">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-sm font-bold text-app-primary mt-4 mb-2 first:mt-0">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-xs font-bold text-app-primary uppercase tracking-wide mt-4 mb-2 first:mt-0">{children}</h3>
+        ),
+        p: ({ children }) => (
+          <p className="text-xs text-app-primary leading-relaxed mb-2 last:mb-0">{children}</p>
+        ),
+        strong: ({ children }) => (
+          <strong className="font-semibold text-app-primary">{children}</strong>
+        ),
+        em: ({ children }) => (
+          <em className="italic text-app-muted">{children}</em>
+        ),
+        ul: ({ children }) => (
+          <ul className="space-y-1 my-2 pl-1">{children}</ul>
+        ),
+        ol: ({ children }) => (
+          <ol className="space-y-1.5 my-2 pl-1 list-none counter-reset-[item]">{children}</ol>
+        ),
+        li: ({ children, node, ...props }) => {
+          // react-markdown passes index via node.position; use counter via CSS instead
+          const isOrdered = node?.parentNode?.tagName === 'ol' ||
+            (typeof props?.index === 'number');
+          return (
+            <li className="flex gap-2.5 text-xs text-app-primary leading-relaxed">
+              {isOrdered ? (
+                <span className="mt-0.5 shrink-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-[var(--accent)]/15 text-[var(--accent)] font-bold text-[10px] leading-none">
+                  {(props?.index ?? 0) + 1}
+                </span>
+              ) : (
+                <span className="mt-1.5 shrink-0 h-1.5 w-1.5 rounded-full bg-[var(--accent)] opacity-70" />
+              )}
+              <span>{children}</span>
+            </li>
+          );
+        },
+        hr: () => (
+          <hr className="my-3 border-app" />
+        ),
+        code: ({ children }) => (
+          <code className="px-1.5 py-0.5 rounded bg-app-subtle text-[var(--accent)] font-mono text-[11px] border border-app">{children}</code>
+        ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-[var(--accent)] pl-3 my-2 text-app-muted italic text-xs">{children}</blockquote>
+        ),
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
+}
 
 const TONE_OPTIONS = [
   { id: "professional", label: "Executive Direct", desc: "Brief, high-signal, enterprise tone" },
@@ -256,8 +322,8 @@ export default function AIModal({
                     <span>Copy</span>
                   </Button>
                 </div>
-                <div className="rounded-control border border-app bg-app-subtle/50 p-4 type-sm text-app-primary leading-relaxed whitespace-pre-wrap">
-                  {summary}
+                <div className="rounded-control border border-app bg-app-subtle/50 p-4 leading-relaxed">
+                  <MarkdownContent content={summary} />
                 </div>
               </div>
             )}
@@ -363,8 +429,8 @@ export default function AIModal({
                     </a>
                   </div>
                 </div>
-                <div className="rounded-control border border-app bg-app-subtle/50 p-4 type-xs text-app-primary leading-relaxed whitespace-pre-wrap">
-                  {emailDraft}
+                <div className="rounded-control border border-app bg-app-subtle/50 p-4 leading-relaxed">
+                  <MarkdownContent content={emailDraft} />
                 </div>
               </div>
             )}

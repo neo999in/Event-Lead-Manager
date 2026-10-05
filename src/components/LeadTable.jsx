@@ -109,6 +109,7 @@ export default function LeadTable({
   onOpenAddModal,
 }) {
   const [openStageMenuId, setOpenStageMenuId] = React.useState(null);
+  const [hoveredNotes, setHoveredNotes] = React.useState(null);
 
   React.useEffect(() => {
     if (!openStageMenuId) return;
@@ -215,36 +216,30 @@ export default function LeadTable({
                     </div>
                   </td>
 
-                  {/* Notes & Follow-up Draft Marker with Full-Text Hover Tooltip */}
+                  {/* Notes & Follow-up Draft Marker */}
                   <td className="py-3.5 px-5">
                     <div
-                      className="group/notes relative inline-block max-w-full"
-                      title={lead.notes || "No notes entered"}
+                      onMouseEnter={(e) => {
+                        if (!lead.notes) return;
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredNotes({
+                          name: lead.name,
+                          event: lead.event,
+                          text: lead.notes,
+                          rect: {
+                            top: rect.top,
+                            bottom: rect.bottom,
+                            left: rect.left,
+                            right: rect.right,
+                          },
+                        });
+                      }}
+                      onMouseLeave={() => setHoveredNotes(null)}
+                      className="cursor-pointer max-w-[280px]"
                     >
-                      <div className="type-xs text-app-muted line-clamp-1 cursor-default hover:text-app-primary transition-app">
+                      <div className="type-xs text-app-muted line-clamp-1 hover:text-app-primary transition-app">
                         {lead.notes || <span className="italic text-app-subtle">No notes entered</span>}
                       </div>
-
-                      {/* Rich Floating Tooltip on Hover */}
-                      {lead.notes && (
-                        <div
-                          className={`pointer-events-none absolute left-0 ${
-                            index === 0 ? "top-full mt-1.5" : "bottom-full mb-1.5"
-                          } w-80 p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/notes:opacity-100 group-hover/notes:translate-y-0 transition-all duration-150 z-50 elevation-overlay`}
-                        >
-                          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
-                            <span>Notes & Context</span>
-                            {lead.event && (
-                              <span className="font-normal normal-case text-app-muted truncate max-w-[140px]">
-                                {lead.event}
-                              </span>
-                            )}
-                          </div>
-                          <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap select-text">
-                            {lead.notes}
-                          </p>
-                        </div>
-                      )}
                     </div>
                     {lead.ai_drafted_email && (
                       <div className="inline-flex items-center gap-1.5 mt-1 text-app-subtle type-xs">
@@ -528,20 +523,26 @@ export default function LeadTable({
               {/* Notes excerpt with full-text hover tooltip */}
               {lead.notes && (
                 <div
-                  className="group/mobnotes relative"
-                  title={lead.notes}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setHoveredNotes({
+                      name: lead.name,
+                      event: lead.event,
+                      text: lead.notes,
+                      rect: {
+                        top: rect.top,
+                        bottom: rect.bottom,
+                        left: rect.left,
+                        right: rect.right,
+                      },
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredNotes(null)}
+                  className="cursor-pointer"
                 >
-                  <p className="type-xs text-app-muted line-clamp-2 bg-app-subtle/40 p-2.5 rounded-control border border-app-subtle leading-relaxed cursor-default hover:text-app-primary transition-app">
+                  <p className="type-xs text-app-muted line-clamp-2 bg-app-subtle/40 p-2.5 rounded-control border border-app-subtle leading-relaxed hover:text-app-primary transition-app">
                     {lead.notes}
                   </p>
-                  <div className="pointer-events-none absolute left-0 bottom-full mb-1.5 w-full p-3 rounded-control bg-app-surface/98 backdrop-blur-md border border-app shadow-xl text-left opacity-0 translate-y-1 group-hover/mobnotes:opacity-100 group-hover/mobnotes:translate-y-0 transition-all duration-150 z-50 elevation-overlay">
-                    <div className="flex items-center justify-between pb-1 mb-1 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
-                      <span>Full Notes & Context</span>
-                    </div>
-                    <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap">
-                      {lead.notes}
-                    </p>
-                  </div>
                 </div>
               )}
 
@@ -595,6 +596,37 @@ export default function LeadTable({
           );
         })}
       </div>
+
+      {/* Viewport-fixed Portal Tooltip - 100% solid background, zero clipping, zero duplicate native tooltip */}
+      {hoveredNotes && (
+        <div
+          style={{
+            position: "fixed",
+            top: hoveredNotes.rect.top < 230 ? hoveredNotes.rect.bottom + 8 : undefined,
+            bottom: hoveredNotes.rect.top >= 230 ? window.innerHeight - hoveredNotes.rect.top + 8 : undefined,
+            left: Math.max(16, Math.min(hoveredNotes.rect.left, typeof window !== "undefined" ? window.innerWidth - 380 : 16)),
+            maxWidth: "360px",
+            width: "max-content",
+            zIndex: 99999,
+            backgroundColor: "var(--bg-surface)",
+            borderColor: "var(--border-strong)",
+            boxShadow: "0 14px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border)",
+          }}
+          className="pointer-events-none p-3.5 rounded-control border text-left animate-in fade-in zoom-in-95 duration-100"
+        >
+          <div className="flex items-center justify-between gap-3 pb-1.5 mb-1.5 border-b border-app text-[10px] font-semibold uppercase tracking-wider text-app-subtle">
+            <span className="text-[var(--accent)] font-bold">Notes & Context</span>
+            {hoveredNotes.event && (
+              <span className="font-medium normal-case text-app-muted truncate max-w-[180px]">
+                {hoveredNotes.event}
+              </span>
+            )}
+          </div>
+          <p className="type-xs text-app-primary leading-relaxed whitespace-pre-wrap select-none font-normal">
+            {hoveredNotes.text}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -97,7 +97,9 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    return handleResponse(res);
+    const json = await handleResponse(res);
+    // Route returns { success, data: { summary, provider, notice } }
+    return json.data ?? json;
   },
 
   // AI Draft Follow-up Email
@@ -107,7 +109,9 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    return handleResponse(res);
+    const json = await handleResponse(res);
+    // Route returns { success, data: { draft, provider, notice } }
+    return json.data ?? json;
   },
 
   // Save AI output directly to lead
