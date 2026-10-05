@@ -84,4 +84,4 @@ npm run build    # Verified clean Turbopack production compilation
 - **Database**: SQLite (`better-sqlite3`)
 - **Styling**: Tailwind CSS v4 & CSS Design Tokens
 - **Icons**: Lucide React
-- **AI Engine**: Google Gemini 1.5 / 2.0 Flash REST API + Local Heuristic Engine
+- **AI Engine**: Google Gemini 3.8 / 3.5 Flash REST API + Local Heuristic Engine
